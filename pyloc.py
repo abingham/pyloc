@@ -65,9 +65,18 @@ def parse_args():
 def main():
     ((options, args), parser) = parse_args()
 
-    for dir in args:
-        mini, maxi = loc(dir)
-        print dir, mini, maxi
+    values = [(dir, loc(dir)) for dir in args]
+    values.append(('TOTAL', 
+                   (sum([x[1][0] for x in values]), 
+                    sum([x[1][1] for x in values]))))
+    max_dir_len = max([len(x[0]) for x in values])
+    max_mini_len = max([len(str(x[1][0])) for x in values])
+    max_maxi_len = max([len(str(x[1][1])) for x in values])
+
+    for (dir, (mini, maxi)) in values:
+        print '%-*s %*s %*s' % (max_dir_len, dir,
+                               max_mini_len, mini,
+                               max_maxi_len, maxi)
 
 if __name__ == '__main__':
     main()
