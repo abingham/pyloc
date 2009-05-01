@@ -1,6 +1,15 @@
 '''lines-of-code counter for python
 
-shamelessly stolen from http://code.activestate.com/recipes/527746/
+pyloc scans a list of directory trees for python source files,
+counting lines of code. For each tree, two counts are reported:
+
+ * A line count include comments and blank lines
+ * A line count with out comments and blank lines
+
+Finally, sums of both counts are reported.
+
+The meat of this code was shamelessly stolen from
+http://code.activestate.com/recipes/527746/
 '''
 
 from optparse import OptionParser
