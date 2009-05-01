@@ -1,5 +1,5 @@
 -*- outline -*-
 
 * option to calculate relative percentages of counts
-* option to count commentary lines
-* pick a license...whatever says "I don't give a crap what you do with my code"
+* option to count commentary lines but not blanks
+* if just a single file is requested, show just that file's count; don't treat it as a dir
