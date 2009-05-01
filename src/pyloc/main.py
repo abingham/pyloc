@@ -15,19 +15,10 @@ http://code.activestate.com/recipes/527746/
 from optparse import OptionParser
 import fnmatch, logging, os, os.path
 
-logger = None
+from .logger import logger, handler
+import pyloc
 
-def init_logger(level=logging.WARNING):
-    global logger
-    logger = logging.getLogger('pyloc')
-    logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    formatter = logging.Formatter('%(name)s: %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
-def walk(root='.', recurse=True, pattern='*'):
+def walk(root='.', recurse=True):
     '''generate a files in a directory tree walk matching a pattern
     
     Walks a directory tree, generating the files it finds that match a
@@ -35,9 +26,6 @@ def walk(root='.', recurse=True, pattern='*'):
 
     :param root: the root of the tree
     :param recurse: whether to recurse
-
-    :param pattern: a regular expression pattern for matching against
-                    filenames
     '''
     
     if os.path.isfile(root):
@@ -45,8 +33,7 @@ def walk(root='.', recurse=True, pattern='*'):
     else:
         for path, subdirs, files in os.walk(root):
             for name in files:
-                if fnmatch.fnmatch(name, pattern):
-                    yield os.path.join(path, name)
+                yield os.path.join(path, name)
             if not recurse:
                 break
 
@@ -65,21 +52,14 @@ def loc(root='', recurse=True):
     :param recurse: whether to recurse
     '''
     count_mini, count_maxi = 0, 0
-    for fspec in walk(root, recurse, '*.py'):
-        skip = False
-        for line in open(fspec).readlines():
-            count_maxi += 1
-            
-            line = line.strip()
-            if line:
-                if line.startswith('#'):
-                    continue
-                if line.startswith('"""'):
-                    skip = not skip
-                    continue
-                if not skip:
-                    count_mini += 1
-
+    for fspec in walk(root, recurse):
+        for pattern, (type, func) in pyloc.lang_map.items():
+            if fnmatch.fnmatch(fspec, pattern):
+                logger.debug('%s TYPE=%s' % (fspec, type))
+                mini,maxi = func(fspec)
+                count_mini += mini
+                count_maxi += maxi
+                break
     return count_mini, count_maxi
 
 def parse_args():
@@ -92,9 +72,7 @@ def main():
     ((options, args), parser) = parse_args()
 
     if options.verbose:
-        init_logger(logging.DEBUG)
-    else:
-        init_logger(logging.WARNING)
+        handler.setLevel(logging.DEBUG)
 
     values = []
     for target in args:

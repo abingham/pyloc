@@ -16,7 +16,7 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'pyloc = pyloc.pyloc:main'
+            'pyloc = pyloc.main:main'
         ]
     },
 
