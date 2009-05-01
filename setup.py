@@ -1,4 +1,13 @@
 from setuptools import setup, find_packages
+
+long_description = '''pyloc scans a list of directory trees for python source files,
+counting lines of code. For each tree, two counts are reported:
+
+ * A line count include comments and blank lines
+ * A line count with out comments and blank lines
+
+Finally, sums of both counts are reported.'''
+
 setup(
     name = "pyloc",
     version = "0.9",
@@ -11,25 +20,24 @@ setup(
         ]
     },
 
-
-    # Project uses reStructuredText, so ensure that the docutils get
-    # installed or upgraded on the target machine
-    # install_requires = ['docutils>=0.3'],
-
-    #package_data = {
-    #    # If any package contains *.txt or *.rst files, include them:
-    #    '': ['*.txt', '*.rst'],
-    #    # And include any *.msg files found in the 'hello' package, too:
-    #    'hello': ['*.msg'],
-    #}
-
     # metadata for upload to PyPI
     author = "Austin Bingham",
     author_email = "austin.bingham@gmail.com",
-    description = "A simply lines-of-code counter for python",
+    description = "A lines-of-code counter for python",
     license = "MIT",
     keywords = "python loc sloc lines-of-code",
-    # url = "http://example.com/HelloWorld/",   # project home page, if any
+    long_description=long_description,
 
-    # could also include long_description, download_url, classifiers, etc.
-)
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Software Development'],
+
+    install_requires=['setuptools']
+
+    )
