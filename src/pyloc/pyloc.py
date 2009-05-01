@@ -13,7 +13,7 @@ http://code.activestate.com/recipes/527746/
 '''
 
 from optparse import OptionParser
-import os
+import os, os.path
 import fnmatch
 
 def walk(root='.', recurse=True, pattern='*'):
@@ -28,12 +28,16 @@ def walk(root='.', recurse=True, pattern='*'):
     :param pattern: a regular expression pattern for matching against
                     filenames
     '''
-    for path, subdirs, files in os.walk(root):
-        for name in files:
-            if fnmatch.fnmatch(name, pattern):
-                yield os.path.join(path, name)
-        if not recurse:
-            break
+    
+    if os.path.isfile(root):
+        yield root
+    else:
+        for path, subdirs, files in os.walk(root):
+            for name in files:
+                if fnmatch.fnmatch(name, pattern):
+                    yield os.path.join(path, name)
+            if not recurse:
+                break
 
 def loc(root='', recurse=True):
     '''count lines of code in a directory structure
