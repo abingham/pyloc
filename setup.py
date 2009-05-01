@@ -10,7 +10,7 @@ Finally, sums of both counts are reported.'''
 
 setup(
     name = "pyloc",
-    version = "0.9",
+    version = "0.9.1",
     package_dir = {'':'src'},
     packages = find_packages('src'),
 

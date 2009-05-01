@@ -13,8 +13,19 @@ http://code.activestate.com/recipes/527746/
 '''
 
 from optparse import OptionParser
-import os, os.path
-import fnmatch
+import fnmatch, logging, os, os.path
+
+logger = None
+
+def init_logger(level=logging.WARNING):
+    global logger
+    logger = logging.getLogger('pyloc')
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    formatter = logging.Formatter('%(name)s: %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 def walk(root='.', recurse=True, pattern='*'):
     '''generate a files in a directory tree walk matching a pattern
@@ -72,13 +83,26 @@ def loc(root='', recurse=True):
     return count_mini, count_maxi
 
 def parse_args():
-    parser = OptionParser(usage='%prog [options] [dir1 dir2 . . .]')
+    parser = OptionParser(usage='%prog [options] [root1 root2 . . .]')
+    parser.add_option('-v', '--verbose', action='store_true',
+                      dest='verbose', help='increase logging output')
     return (parser.parse_args(),parser)
 
 def main():
     ((options, args), parser) = parse_args()
 
-    values = [(dir, loc(dir)) for dir in args]
+    if options.verbose:
+        init_logger(logging.DEBUG)
+    else:
+        init_logger(logging.WARNING)
+
+    values = []
+    for target in args:
+        if not os.path.exists(target):
+            logger.error('file or directory not found: %s' % target)
+        else:
+            values.append((target, loc(target)))
+
     values.append(('TOTAL', 
                    (sum([x[1][0] for x in values]), 
                     sum([x[1][1] for x in values]))))

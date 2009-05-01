@@ -2,4 +2,4 @@
 
 * option to calculate relative percentages of counts
 * option to count commentary lines but not blanks
-* if just a single file is requested, show just that file's count; don't treat it as a dir
+* ability to show just top-level sums, intermediate directory sums, or individual file sums...granularity control
