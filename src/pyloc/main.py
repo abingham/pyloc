@@ -12,6 +12,7 @@ The meat of this code was shamelessly stolen from
 http://code.activestate.com/recipes/527746/
 '''
 
+from cStringIO import StringIO
 from optparse import OptionParser
 import fnmatch, logging, os, os.path
 
@@ -51,16 +52,18 @@ def loc(root='', recurse=True):
     :param root: the root of the tree to search
     :param recurse: whether to recurse
     '''
-    count_mini, count_maxi = 0, 0
+    sums = {}
     for fspec in walk(root, recurse):
         for pattern, (type, func) in pyloc.lang_map.items():
             if fnmatch.fnmatch(fspec, pattern):
                 logger.debug('%s TYPE=%s' % (fspec, type))
-                mini,maxi = func(fspec)
-                count_mini += mini
-                count_maxi += maxi
+                for k,v in func(fspec).items():
+                    try:
+                        sums[k] += v
+                    except KeyError:
+                        sums[k] = v
                 break
-    return count_mini, count_maxi
+    return sums
 
 def parse_args():
     parser = OptionParser(usage='%prog [options] [root1 root2 . . .]')
@@ -81,17 +84,51 @@ def main():
         else:
             values.append((target, loc(target)))
 
-    values.append(('TOTAL', 
-                   (sum([x[1][0] for x in values]), 
-                    sum([x[1][1] for x in values]))))
-    max_dir_len = max([len(x[0]) for x in values])
-    max_mini_len = max([len(str(x[1][0])) for x in values])
-    max_maxi_len = max([len(str(x[1][1])) for x in values])
+    # sum up all categories
+    sums = {}
+    for tgt,vals in values:
+        for k,v in vals.items():
+            try:
+                sums[k] += v
+            except KeyError:
+                sums[k] = v
+    values.append(('TOTAL', sums))
 
-    for (dir, (mini, maxi)) in values:
-        print '%-*s %*s %*s' % (max_dir_len, dir,
-                               max_mini_len, mini,
-                               max_maxi_len, maxi)
+    keys = sums.keys()
+    keys.remove('total')
+    keys.remove('minimum')
+    keys = ['total', 'minimum'] + keys
+
+    max_dir_len = max([len(x[0]) for x in values])
+    
+    max_lens = {}
+    for k in keys:
+        max_lens[k] = max([len(str(x[1][k])) for x in values])
+        max_lens[k] = max([max_lens[k], len(k)])
+
+    io = StringIO()
+
+    io.write('%-*s' % (max_dir_len, 'directory'))
+    for k in keys:
+        io.write(' %*s' % (max_lens[k], k))
+    io.write('\n')
+
+    io.write('%*s' % (max_dir_len, '-' * max_dir_len))
+    for k in keys:
+        io.write(' %*s' % (max_lens[k], '-' * len(k)))
+    io.write('\n')
+
+    for dir, vals in values:
+        io.write('%-*s' % (max_dir_len, dir))
+
+        for k in keys:
+            try:
+                io.write(' %*s' % (max_lens[k], vals[k]))
+            except KeyError:
+                io.write(' %*s' % (max_lens[k], ''))
+        io.write('\n')
+
+    print io.getvalue()
 
 if __name__ == '__main__':
     main()
