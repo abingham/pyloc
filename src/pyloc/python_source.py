@@ -6,8 +6,10 @@ class LOCLexer:
                #'ESCAPED_DOUBLE_QUOTE',
                #'SINGLE_QUOTE',
                #'SINGLE_DOUBLE_QUOTE',
-               'MULTILINE_QUOTE',
-               'MULTILINE_DOUBLE_QUOTE', 
+               'MULTILINE_SINGLE_STRING',
+               'MULTILINE_DOUBLE_STRING',
+               'SINGLE_STRING',
+               'DOUBLE_STRING',
                )
 
     space = r'[\t\ ]*'
@@ -21,7 +23,7 @@ class LOCLexer:
         self.empty_line = False
 
     @TOKEN(space + r"'''(.|\n)*?" + escaped_quote + "'''")
-    def t_MULTILINE_QUOTE(self, t):
+    def t_MULTILINE_SINGLE_STRING(self, t):
         lines = len(t.value.split('\n'))
         if self.empty_line:
             self.docstring_line_count += lines
@@ -30,13 +32,25 @@ class LOCLexer:
         self.lexer.lineno += lines - 1
 
     @TOKEN(space + r'"""(.|\n)*?' + escaped_double_quote + '"""')
-    def t_MULTILINE_DOUBLE_QUOTE(self, t):
+    def t_MULTILINE_DOUBLE_STRING(self, t):
         lines = len(t.value.split('\n'))
         if self.empty_line:
             self.docstring_line_count += lines
 
         self.empty_line = False
         self.lexer.lineno += lines - 1
+
+    @TOKEN(space + r"'(.|\\\')*'")
+    def t_SINGLE_STRING(self, t):
+        if self.empty_line:
+            self.docstring_line_count += 1
+        self.empty_line = False
+
+    @TOKEN(space + r'"(.|\\\")*"')
+    def t_DOUBLE_STRING(self, t):
+        if self.empty_line:
+            self.docstring_line_count += 1
+        self.empty_line = False
 
     #t_ESCAPED_SINGLE_QUOTE = r"\'"
     #t_ESCAPED_DOUBLE_QUOTE = r'\"'
