@@ -1,5 +1,5 @@
-import pyloc.python
+import pyloc.python_source
 
 lang_map = {
-    '*.py' : ('python', pyloc.python.loc)
+    '*.py' : ('python_source', pyloc.python_source.loc)
     }

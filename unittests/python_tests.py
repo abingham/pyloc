@@ -1,6 +1,6 @@
 import unittest
 
-import pyloc.python as p
+import pyloc.python_source as p
 
 def process_input(l, input):
     l.lexer.input(input)
