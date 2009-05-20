@@ -74,6 +74,9 @@ def parse_args():
 def main():
     ((options, args), parser) = parse_args()
 
+    if len(args) == 0:
+        return
+
     if options.verbose:
         handler.setLevel(logging.DEBUG)
 
