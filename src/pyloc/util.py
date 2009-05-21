@@ -43,7 +43,7 @@ def loc(root='', recurse=True):
         for pattern, (type, func) in pyloc.lang_map.items():
             if fnmatch.fnmatch(fspec, pattern):
                 logger.debug('%s TYPE=%s' % (fspec, type))
-                for k,v in func(fspec).items():
+                for k,v in func(open(fspec, 'r')).items():
                     try:
                         sums[k] += v
                     except KeyError:

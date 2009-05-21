@@ -23,8 +23,8 @@ class LOCLexer(object):
     escaped_quote = r'(\\\')*'
     escaped_double_quote = r'(\\\")*'
 
-    @TOKEN(space + r'\#.*')
     def t_COMMENT_LINE(self, t):
+        r'\#.*'
         if not self.comment_line:
             self.comment_line_count += 1
             self.comment_line = True
@@ -41,11 +41,11 @@ class LOCLexer(object):
         self.empty_line = False
         self.lexer.lineno += lines - 1
 
-    @TOKEN(space + r"'''(.|\n)*?" + escaped_quote + "'''")
+    @TOKEN(r"'''(.|\n)*?" + escaped_quote + r"'''")
     def t_MULTILINE_SINGLE_STRING(self, t):
         self.multiline_string(t)
 
-    @TOKEN(space + r'"""(.|\n)*?' + escaped_double_quote + '"""')
+    @TOKEN(r'"""(.|\n)*?' + escaped_double_quote + '"""')
     def t_MULTILINE_DOUBLE_STRING(self, t):
         self.multiline_string(t)
 
@@ -56,15 +56,22 @@ class LOCLexer(object):
             self.comment_line = True
         self.empty_line = False        
 
-    @TOKEN(space + r"'(.|\\\')*'")
+    @TOKEN(r"'(.|\\\')*'")
     def t_SINGLE_STRING(self, t):
         self.singleline_string(t)
 
-    @TOKEN(space + r'"(.|\\\")*"')
+    @TOKEN(r'"(.|\\\")*"')
     def t_DOUBLE_STRING(self, t):
         self.singleline_string(t)
 
-    @TOKEN(space + r'\n')
+    def t_CODE(self, t):
+        r'\S(^\#)*'
+        if not self.code_line:
+            self.code_line = True
+            self.code_line_count += 1
+        self.empty_line = False
+
+    @TOKEN(r'\n')
     def t_newline(self, t):
         if self.empty_line:
             self.empty_line_count += 1
@@ -75,10 +82,7 @@ class LOCLexer(object):
 
     space_re = re.compile(space)
     def t_error(self, t):
-        if not self.code_line:
-            self.code_line = True
-            self.code_line_count += 1
-        self.empty_line = False
+        # self.empty_line = False
         t.lexer.skip(1) 
 
     def line_count(self):

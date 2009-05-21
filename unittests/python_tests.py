@@ -18,8 +18,8 @@ class LexerTests(unittest.TestCase):
                    docstring):
         c = p.loc(cStringIO.StringIO(text))
 
-        for tag in ['total', 'code', 'empty', 'comment', 'docstring']:
-            exec("print '%s', %s, c['%s']" % (tag, tag, tag))
+        #for tag in ['total', 'code', 'empty', 'comment', 'docstring']:
+        #    exec("print '%s', %s, c['%s']" % (tag, tag, tag))
 
         self.assert_(c['total']     == total)
         self.assert_(c['code']      == code)
@@ -166,8 +166,7 @@ non-docstring""" # this is a comment
             5, 1, 2, 2, 2)
 
     def test_single_string_and_comment(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """def yak():
   'basic docstring # no comment'
   # regular comment
@@ -175,33 +174,30 @@ non-docstring""" # this is a comment
   x = 1 # another comment
   y = 'a string' # with a comment
   'a docstring' # followed by a comment
-""")
-        self.count_test(7, 3, 1, 5, 2)
+""",
+            7, 3, 1, 5, 2)
 
     def test_double_string_basic(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def foo():
   "this is is a docstring"
 
   "as is this"
-''')
-        self.count_test(4, 1, 1, 2, 2)
+''',
+            4, 1, 1, 2, 2)
         
     def test_double_string_hash(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''
  def llama():
    " # this is a docstring "
 
    "hopefully this all # works "
- ''')
-        self.count_test(5, 1, 2, 2, 2)
+ ''',
+            5, 1, 2, 2, 2)
 
     def test_double_string_and_comment(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def yak():
   "basic docstring # no comment"
   # regular comment
@@ -209,8 +205,8 @@ non-docstring""" # this is a comment
   x = 1 # another comment
   y = "a string" # with a comment
   "a docstring" # followed by a comment
-''')
-        self.count_test(7, 3, 1, 5, 2)
+''',
+            7, 3, 1, 5, 2)
 
 def suite():
     return unittest.TestLoader().loadTestsFromTestCase(LexerTests)
