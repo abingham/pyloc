@@ -27,26 +27,21 @@ def walk(root='.', recurse=True):
 def loc(root='', recurse=True):
     '''count lines of code in a directory structure
 
-    Generates two counts:
-
-     * maximal size (source LOC) with blank lines and comments
-     * minimal size (logical LOC) stripping same
-
     Sums all Python files in the specified folder.
     By default recurses through subfolders.
+
+    
 
     :param root: the root of the tree to search
     :param recurse: whether to recurse
     '''
-    sums = {}
+    rslt = {}
     for fspec in walk(root, recurse):
         for pattern, (type, func) in pyloc.lang_map.items():
             if fnmatch.fnmatch(fspec, pattern):
                 logger.debug('%s TYPE=%s' % (fspec, type))
-                for k,v in func(open(fspec, 'r')).items():
-                    try:
-                        sums[k] += v
-                    except KeyError:
-                        sums[k] = v
+
+                counts = func(open(fspec, 'r'))
+                rslt[fspec] = (root, type, counts)
                 break
-    return sums
+    return rslt

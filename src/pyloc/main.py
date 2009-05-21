@@ -19,6 +19,57 @@ import fnmatch, logging, os.path
 from .logger import logger, handler
 from .util import loc
 
+def format_by_language(values):
+    field_sizes = { 'file type' : len('file type') }
+    headings = ['file type']
+
+    # convert values to { filetype -> counts }
+    values = dict([(value[1], value[2]) for value in values.values()])
+
+    sums = {}
+    categories = set()
+    for filetype, counts in values.items():
+        field_sizes['file type'] = max(field_sizes['file type'],
+                                       len(filetype))
+        for cat,count in counts.items():
+            categories.add(cat)
+            try:
+                field_sizes[cat] = max(field_sizes[cat],
+                                       len(cat),
+                                       len(str(count)))
+                sums[cat] += count
+            except:
+                field_sizes[cat] = max(len(cat),
+                                       len(str(count)))
+                sums[cat] = count
+
+    categories = list(categories)
+    headings += categories
+
+    io = StringIO()
+
+    io.write(' '.join(['%*s' % (field_sizes[heading], heading) for heading in headings]))
+    io.write('\n')
+    io.write(' '.join(['%*s' % (field_sizes[heading], '-' * field_sizes[heading]) for heading in headings]))
+    io.write('\n')
+
+    for filetype, counts in values.items():
+        io.write('%*s' % (field_sizes['file type'], filetype))
+        for cat in categories:
+            try:
+                val = counts[cat]
+            except:
+                val = ''
+            io.write(' %*s' % (field_sizes[cat], val))
+        io.write('\n')
+
+    io.write('%*s' % (field_sizes['file type'], 'TOTAL'))
+    for cat in categories:
+        io.write(' %*s' % (field_sizes[cat], sums[cat]))
+    io.write('\n')
+
+    print io.getvalue()
+
 def parse_args():
     parser = OptionParser(usage='%prog [options] [root1 root2 . . .]')
     parser.add_option('-v', '--verbose', action='store_true',
@@ -34,58 +85,62 @@ def main():
     if options.verbose:
         handler.setLevel(logging.DEBUG)
 
-    values = []
+    values = {}
     for target in args:
         if not os.path.exists(target):
             logger.error('file or directory not found: %s' % target)
         else:
-            values.append((target, loc(target)))
+            values.update(loc(target))
 
-    # sum up all categories
-    sums = {}
-    for tgt,vals in values:
-        for k,v in vals.items():
-            try:
-                sums[k] += v
-            except KeyError:
-                sums[k] = v
-    values.append(('TOTAL', sums))
+    format_by_language(values)
+    #for k,v in values.items():
+    #    print k,v
 
-    keys = sums.keys()
-    keys.remove('total')
-    keys.remove('minimum')
-    keys = ['total', 'minimum'] + keys
+#     # sum up all categories
+#     sums = {}
+#     for tgt,vals in values:
+#         for k,v in vals.items():
+#             try:
+#                 sums[k] += v
+#             except KeyError:
+#                 sums[k] = v
+#     values.append(('TOTAL', sums))
 
-    max_dir_len = max([len(x[0]) for x in values])
+#     keys = sums.keys()
+#     keys.remove('total')
+#     keys.remove('code')
+#     keys = ['total', 'code'] + keys
+
+#     max_dir_len = max([len(x[0]) for x in values])
     
-    max_lens = {}
-    for k in keys:
-        max_lens[k] = max([len(str(x[1][k])) for x in values])
-        max_lens[k] = max([max_lens[k], len(k)])
+#     max_lens = {}
+#     for k in keys:
+#         max_lens[k] = max([len(str(x[1][k])) for x in values])
+#         max_lens[k] = max([max_lens[k], len(k)])
 
-    io = StringIO()
+#     io = StringIO()
 
-    io.write('%-*s' % (max_dir_len, 'directory'))
-    for k in keys:
-        io.write(' %*s' % (max_lens[k], k))
-    io.write('\n')
+#     io.write('%-*s' % (max_dir_len, 'directory'))
+#     for k in keys:
+#         io.write(' %*s' % (max_lens[k], k))
+#     io.write('\n')
 
-    io.write('%*s' % (max_dir_len, '-' * max_dir_len))
-    for k in keys:
-        io.write(' %*s' % (max_lens[k], '-' * len(k)))
-    io.write('\n')
+#     io.write('%*s' % (max_dir_len, '-' * max_dir_len))
+#     for k in keys:
+#         io.write(' %*s' % (max_lens[k], '-' * len(k)))
+#     io.write('\n')
 
-    for dir, vals in values:
-        io.write('%-*s' % (max_dir_len, dir))
+#     for dir, vals in values:
+#         io.write('%-*s' % (max_dir_len, dir))
 
-        for k in keys:
-            try:
-                io.write(' %*s' % (max_lens[k], vals[k]))
-            except KeyError:
-                io.write(' %*s' % (max_lens[k], ''))
-        io.write('\n')
+#         for k in keys:
+#             try:
+#                 io.write(' %*s' % (max_lens[k], vals[k]))
+#             except KeyError:
+#                 io.write(' %*s' % (max_lens[k], ''))
+#         io.write('\n')
 
-    print io.getvalue()
+#     print io.getvalue()
 
 if __name__ == '__main__':
     main()

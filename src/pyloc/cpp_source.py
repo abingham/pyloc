@@ -49,21 +49,19 @@ class LOCLexer(object):
 
         self.comment_line_count = 0
 
-def loc(filename):
+def loc(f):
     '''count lines of code in c++ files'''
     
     l = LOCLexer()
     l.build()
-    io = cStringIO.StringIO()
-    io.write(open(filename, 'r').read())
-    l.lexer.input(io.getvalue())
+    l.lexer.input(f.read())
     while True:
         tok = l.lexer.token()
         if not tok: break
 
     line_count = l.lexer.lineno - 1
     return { 'total' : line_count,
-             'minimum' : line_count - l.empty_line_count - l.comment_line_count,
+             'code' : line_count - l.empty_line_count - l.comment_line_count,
              'empty' : l.empty_line_count,
              'comment' : l.comment_line_count, }
 
