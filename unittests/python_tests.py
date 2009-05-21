@@ -1,73 +1,73 @@
-import unittest
+import cStringIO, unittest
 
 import pyloc.python_source as p
 
-def process_input(l, input):
-    l.lexer.input(input)
-    while True:
-        tok = l.lexer.token()
-        if not tok: break
-
 class LexerTests(unittest.TestCase):
     def setUp(self):
-        self.l = p.LOCLexer()
-        self.l.build()
+        pass
 
     def tearDown(self):
         pass
 
+    def basic_test(self, 
+                   text, 
+                   total, 
+                   code, 
+                   empty, 
+                   comment, 
+                   docstring):
+        c = p.loc(cStringIO.StringIO(text))
+
+        for tag in ['total', 'code', 'empty', 'comment', 'docstring']:
+            exec("print '%s', %s, c['%s']" % (tag, tag, tag))
+
+        self.assert_(c['total']     == total)
+        self.assert_(c['code']      == code)
+        self.assert_(c['empty']     == empty)
+        self.assert_(c['comment']   == comment)
+        self.assert_(c['docstring'] == docstring)
+
     def test_empty_file(self):
-        process_input(self.l, '')
-            
-        self.assert_(self.l.line_count() == 0)
-        self.assert_(self.l.empty_line_count == 0)
+        self.basic_test(
+            '',
+            0, 0, 0, 0, 0)
 
     def test_simple(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def foo():
   """a docstring"""
   x = 1
-''')
-        self.assert_(self.l.line_count() == 3)
-        self.assert_(self.l.empty_line_count == 0)
+''',
+            3, 2, 0, 1, 1)
         
     def test_all_empty(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''
 
 
-''')
-        self.assert_(self.l.line_count() == 3)
-        self.assert_(self.l.empty_line_count == self.l.line_count())
+''',
+            3, 0, 3, 0, 0)
 
     def test_middle_line(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''
-asdf
+asdf=3
 
-''')
-        self.assert_(self.l.line_count() == 3)
-        self.assert_(self.l.empty_line_count == 2)
+''',
+            3, 1, 2, 0, 0)
 
     def test_basic_comments(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def foo():
   # a comment
   x = 1 # comment for this line
   # another comment
   y = 3
-''')
-        self.assert_(self.l.line_count() == 5)
-        self.assert_(self.l.empty_line_count == 0)
-        self.assert_(self.l.comment_line_count == 2)
+''',
+            5, 3, 0, 3, 0)
 
     def test_multiline_basic(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """def foo():
   '''this is 
 
@@ -76,15 +76,11 @@ line
 comment'''
 
   '''technically, so is this'''
-""")
-        self.assert_(self.l.line_count() == 8)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 6)
+""",
+            8, 1, 1, 6, 6)
 
     def test_multiline_hash(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """
 def llama():
   ''' # this is 
@@ -93,15 +89,11 @@ part # of a
 comment'''
 
   '''hopefully this all # works '''
-""")
-        self.assert_(self.l.line_count() == 8)
-        self.assert_(self.l.empty_line_count == 2)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 5) 
+""",
+            8, 1, 2, 5, 5)
 
     def test_multiline_and_comment(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """def yak():
   '''basic docstring # no comment'''
   # regular comment
@@ -111,15 +103,11 @@ comment'''
 non-docstring''' # this is a comment
   # as is this '''hehehe'''
   '''hmmmm''' # hahaha
-""")
-        self.assert_(self.l.line_count() == 9)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 2)
-        self.assert_(self.l.docstring_line_count == 2)
+""",
+            9, 3, 1, 6, 2)
 
     def test_multiline_double_basic(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def foo():
   """this is 
 
@@ -128,15 +116,11 @@ line
 comment"""
 
   """technically, so is this"""
-''')
-        self.assert_(self.l.line_count() == 8)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 6)
+''',
+            8, 1, 1, 6, 6)
 
     def test_multiline_double_hash(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''
 def llama():
   """ # this is 
@@ -145,15 +129,11 @@ part # of a
 comment"""
 
   """hopefully this all # works """
-''')
-        self.assert_(self.l.line_count() == 8)
-        self.assert_(self.l.empty_line_count == 2)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 5) 
+''',
+            8, 1, 2, 5, 5)
 
     def test_multiline_double_and_comment(self):
-        process_input(
-            self.l,
+        self.basic_test(
             '''def yak():
   """basic docstring # no comment"""
   # regular comment
@@ -163,38 +143,27 @@ comment"""
 non-docstring""" # this is a comment
   # as is this """hehehe"""
   """hmmmm""" # hahaha
-''')
-        self.assert_(self.l.line_count() == 9)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 2)
-        self.assert_(self.l.docstring_line_count == 2)
+''',
+            9, 3, 1, 6, 2)
 
     def test_single_string_basic(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """def foo():
   'this is is a docstring'
 
   'as is this'
-""")
-        self.assert_(self.l.line_count() == 4)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 2)
+""",
+            4, 1, 1, 2, 2)
         
     def test_single_string_hash(self):
-        process_input(
-            self.l,
+        self.basic_test(
             """
  def llama():
    ' # this is a docstring '
 
    'hopefully this all # works '
- """)
-        self.assert_(self.l.line_count() == 5)
-        self.assert_(self.l.empty_line_count == 2)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 2) 
+ """,
+            5, 1, 2, 2, 2)
 
     def test_single_string_and_comment(self):
         process_input(
@@ -207,10 +176,7 @@ non-docstring""" # this is a comment
   y = 'a string' # with a comment
   'a docstring' # followed by a comment
 """)
-        self.assert_(self.l.line_count() == 7)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 1)
-        self.assert_(self.l.docstring_line_count == 2)
+        self.count_test(7, 3, 1, 5, 2)
 
     def test_double_string_basic(self):
         process_input(
@@ -220,10 +186,7 @@ non-docstring""" # this is a comment
 
   "as is this"
 ''')
-        self.assert_(self.l.line_count() == 4)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 2)
+        self.count_test(4, 1, 1, 2, 2)
         
     def test_double_string_hash(self):
         process_input(
@@ -234,10 +197,7 @@ non-docstring""" # this is a comment
 
    "hopefully this all # works "
  ''')
-        self.assert_(self.l.line_count() == 5)
-        self.assert_(self.l.empty_line_count == 2)
-        self.assert_(self.l.comment_line_count == 0)
-        self.assert_(self.l.docstring_line_count == 2) 
+        self.count_test(5, 1, 2, 2, 2)
 
     def test_double_string_and_comment(self):
         process_input(
@@ -250,10 +210,7 @@ non-docstring""" # this is a comment
   y = "a string" # with a comment
   "a docstring" # followed by a comment
 ''')
-        self.assert_(self.l.line_count() == 7)
-        self.assert_(self.l.empty_line_count == 1)
-        self.assert_(self.l.comment_line_count == 1)
-        self.assert_(self.l.docstring_line_count == 2)
+        self.count_test(7, 3, 1, 5, 2)
 
 def suite():
     return unittest.TestLoader().loadTestsFromTestCase(LexerTests)

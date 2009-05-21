@@ -1,6 +1,17 @@
 from ply.lex import TOKEN
+import re
 
-class LOCLexer:
+class LOCLexer(object):
+    '''count loc in python
+
+     * total: all lines of all sorts
+     * code: lines that have any sort of actual code
+     * comment: lines that have any sort of commentary. This includes
+       docstring lines (see below)
+     * blank: lines that are completely empty
+     * docstring: lines that look like docstrings (though we don't
+       enough parsing to determine if they're actually docstrings)
+    '''
     tokens = ( 'COMMENT_LINE',
                'MULTILINE_SINGLE_STRING',
                'MULTILINE_DOUBLE_STRING',
@@ -8,45 +19,50 @@ class LOCLexer:
                'DOUBLE_STRING',
                )
 
-    space = r'[\t\ ]*'
+    space = r'[ \t\r\f\v]*'
     escaped_quote = r'(\\\')*'
     escaped_double_quote = r'(\\\")*'
 
-    @TOKEN(space + r'\#')
+    @TOKEN(space + r'\#.*')
     def t_COMMENT_LINE(self, t):
-        if self.empty_line:
+        if not self.comment_line:
             self.comment_line_count += 1
+            self.comment_line = True
         self.empty_line = False
+
+    def multiline_string(self, t):
+        lines = len(t.value.split('\n'))
+
+        if self.empty_line:
+            self.docstring_line_count += lines
+            self.comment_line_count += lines
+            self.comment_line = True
+
+        self.empty_line = False
+        self.lexer.lineno += lines - 1
 
     @TOKEN(space + r"'''(.|\n)*?" + escaped_quote + "'''")
     def t_MULTILINE_SINGLE_STRING(self, t):
-        lines = len(t.value.split('\n'))
-        if self.empty_line:
-            self.docstring_line_count += lines
-
-        self.empty_line = False
-        self.lexer.lineno += lines - 1
+        self.multiline_string(t)
 
     @TOKEN(space + r'"""(.|\n)*?' + escaped_double_quote + '"""')
     def t_MULTILINE_DOUBLE_STRING(self, t):
-        lines = len(t.value.split('\n'))
-        if self.empty_line:
-            self.docstring_line_count += lines
+        self.multiline_string(t)
 
-        self.empty_line = False
-        self.lexer.lineno += lines - 1
+    def singleline_string(self, t):
+        if self.empty_line:
+            self.docstring_line_count += 1
+            self.comment_line_count += 1
+            self.comment_line = True
+        self.empty_line = False        
 
     @TOKEN(space + r"'(.|\\\')*'")
     def t_SINGLE_STRING(self, t):
-        if self.empty_line:
-            self.docstring_line_count += 1
-        self.empty_line = False
+        self.singleline_string(t)
 
     @TOKEN(space + r'"(.|\\\")*"')
     def t_DOUBLE_STRING(self, t):
-        if self.empty_line:
-            self.docstring_line_count += 1
-        self.empty_line = False
+        self.singleline_string(t)
 
     @TOKEN(space + r'\n')
     def t_newline(self, t):
@@ -54,8 +70,14 @@ class LOCLexer:
             self.empty_line_count += 1
         self.lexer.lineno += 1
         self.empty_line = True
+        self.comment_line = False
+        self.code_line = False
 
+    space_re = re.compile(space)
     def t_error(self, t):
+        if not self.code_line:
+            self.code_line = True
+            self.code_line_count += 1
         self.empty_line = False
         t.lexer.skip(1) 
 
@@ -66,35 +88,36 @@ class LOCLexer:
         import ply.lex
         self.lexer = ply.lex.lex(object=self,**kwargs)
 
-    def __init__(self, **kwargs):
+    def __init__(self):
+        self.code_line_count = 0
+        self.code_line = False
+
         self.empty_line_count = 0
         self.empty_line = True
 
         self.comment_line_count = 0
+        self.comment_line = False
 
-        self.quote_type = None
         self.docstring_line_count = 0
 
-import cStringIO
+def loc(f):
+    '''count lines of code in python files
 
-def loc(filename):
-    '''count lines of code in python files'''
+    :param f: a file-like object from which to read the code
+    '''
 
     l = LOCLexer()
     l.build()
-    io = cStringIO.StringIO()
-    io.write(open(filename, 'r').read())
-    l.lexer.input(io.getvalue())
+    l.lexer.input(f.read())
     while True:
         tok = l.lexer.token()
         if not tok: break
 
     return { 'total' : l.line_count(),
-             'minimum' : l.line_count() - l.empty_line_count - l.comment_line_count - l.docstring_line_count,
+             'code' : l.code_line_count,
              'empty' : l.empty_line_count,
              'comment' : l.comment_line_count,
              'docstring' : l.docstring_line_count }
-    return l.line_count() - l.empty_line_count, l.line_count()
 
 if __name__ == '__main__':
     '''a simple spot-test harness'''
@@ -111,6 +134,7 @@ if __name__ == '__main__':
         
     print io.getvalue()
     print 'total:',    l.line_count()
+    print 'code:',     l.code_line_count
     print 'empty:',    l.empty_line_count
     print 'comment:',  l.comment_line_count
     print 'docstring:',l.docstring_line_count
