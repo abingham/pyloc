@@ -23,8 +23,18 @@ def format_by_language(values):
     field_sizes = { 'file type' : len('file type') }
     headings = ['file type']
 
-    # convert values to { filetype -> counts }
-    values = dict([(value[1], value[2]) for value in values.values()])
+    # convert values to [(filetype,counts), . . .]
+    type_sums = {}
+    for value in values.values():
+        lang = value[1]
+        counts = value[2]
+
+        try:
+            for cat,count in counts.items():
+                type_sums[lang][cat] += count
+        except KeyError:
+            type_sums[lang] = counts
+    values = type_sums
 
     sums = {}
     categories = set()
@@ -38,7 +48,7 @@ def format_by_language(values):
                                        len(cat),
                                        len(str(count)))
                 sums[cat] += count
-            except:
+            except KeyError:
                 field_sizes[cat] = max(len(cat),
                                        len(str(count)))
                 sums[cat] = count
