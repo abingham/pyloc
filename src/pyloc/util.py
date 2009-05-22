@@ -39,7 +39,7 @@ def loc(root='', recurse=True):
     for fspec in walk(root, recurse):
         for pattern, (type, func) in pyloc.lang_map.items():
             if fnmatch.fnmatch(fspec, pattern):
-                logger.debug('%s TYPE=%s' % (fspec, type))
+                logger.info('%s TYPE=%s PATTERN=%s' % (fspec, type, pattern))
 
                 counts = func(open(fspec, 'r'))
                 rslt[fspec] = (root, type, counts)
