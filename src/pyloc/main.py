@@ -20,10 +20,14 @@ from .logger import logger, handler
 from .util import loc
 
 def format_by_language(values):
+    '''print out results on a per-language basis
+    
+    :param values: { filename -> (root, filetype, { catg -> count } ) }
+    '''
     field_sizes = { 'file type' : len('file type') }
     headings = ['file type']
 
-    # convert values to [(filetype,counts), . . .]
+    # convert values to {filetype -> {catg -> count} }
     type_sums = {}
     for value in values.values():
         lang = value[1]
@@ -72,6 +76,9 @@ def format_by_language(values):
                 val = ''
             io.write(' %*s' % (field_sizes[cat], val))
         io.write('\n')
+
+    io.write(' '.join(['%*s' % (field_sizes[heading], '-' * field_sizes[heading]) for heading in headings]))
+    io.write('\n')        
 
     io.write('%*s' % (field_sizes['file type'], 'TOTAL'))
     for cat in categories:
