@@ -1,0 +1,11 @@
+-*- mode: org; -*-
+
+PyLOC Orgfile
+
+All TODOs
+* TODO Clean up main()...it works but it could use some beautification
+* TODO option to calculate relative percentages of counts
+* TODO option to count commentary lines but not blanks
+* TODO documentation
+** TODO expected output of an loc() function
+* TODO ability to show just top-level sums, intermediate directory sums, or individual file sums...granularity control

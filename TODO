@@ -1,6 +1,0 @@
--*- outline -*-
-
-* Clean up main()...it works but it could use some beautification
-* option to calculate relative percentages of counts
-* option to count commentary lines but not blanks
-* ability to show just top-level sums, intermediate directory sums, or individual file sums...granularity control
