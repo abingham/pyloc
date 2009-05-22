@@ -32,6 +32,7 @@ def format_by_language(values):
     for value in values.values():
         lang = value[1]
         counts = value[2]
+        counts['file count'] = 1
 
         try:
             for cat,count in counts.items():
@@ -110,54 +111,6 @@ def main():
             values.update(loc(target))
 
     format_by_language(values)
-    #for k,v in values.items():
-    #    print k,v
-
-#     # sum up all categories
-#     sums = {}
-#     for tgt,vals in values:
-#         for k,v in vals.items():
-#             try:
-#                 sums[k] += v
-#             except KeyError:
-#                 sums[k] = v
-#     values.append(('TOTAL', sums))
-
-#     keys = sums.keys()
-#     keys.remove('total')
-#     keys.remove('code')
-#     keys = ['total', 'code'] + keys
-
-#     max_dir_len = max([len(x[0]) for x in values])
-    
-#     max_lens = {}
-#     for k in keys:
-#         max_lens[k] = max([len(str(x[1][k])) for x in values])
-#         max_lens[k] = max([max_lens[k], len(k)])
-
-#     io = StringIO()
-
-#     io.write('%-*s' % (max_dir_len, 'directory'))
-#     for k in keys:
-#         io.write(' %*s' % (max_lens[k], k))
-#     io.write('\n')
-
-#     io.write('%*s' % (max_dir_len, '-' * max_dir_len))
-#     for k in keys:
-#         io.write(' %*s' % (max_lens[k], '-' * len(k)))
-#     io.write('\n')
-
-#     for dir, vals in values:
-#         io.write('%-*s' % (max_dir_len, dir))
-
-#         for k in keys:
-#             try:
-#                 io.write(' %*s' % (max_lens[k], vals[k]))
-#             except KeyError:
-#                 io.write(' %*s' % (max_lens[k], ''))
-#         io.write('\n')
-
-#     print io.getvalue()
 
 if __name__ == '__main__':
     main()
