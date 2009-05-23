@@ -10,17 +10,20 @@ class Tests(unittest.TestCase):
         pass
 
     def test_python(self):
-        t1_expected = { 'data/test1.py' : ('data/test1.py', 'Python', {'comment': 2, 'code': 2, 'total': 5, 'docstring': 2, 'empty': 1}) }
-        t2_expected = { 'data/test2.py' : ('data/test2.py', 'Python', {'comment': 1, 'code': 3, 'total': 5, 'docstring': 1, 'empty': 1}) }
+        t1_expected = {'comment': 2, 'code': 2, 'total': 5, 'docstring': 2, 'empty': 1}
+        t2_expected = {'comment': 1, 'code': 3, 'total': 5, 'docstring': 1, 'empty': 1}
         
-        self.assert_(loc('data/test1.py') == t1_expected)
-        self.assert_(loc('data/test2.py') == t2_expected)
+        self.assert_(loc(['data/test1.py']).counts_by_type('Python') == t1_expected)
+        self.assert_(loc(['data/test2.py']).counts_by_type('Python') == t2_expected)
 
     def test_python_dir(self):
-        expected = { 'data/test1.py' : ('data', 'Python', { 'comment' : 2, 'code' : 2, 'total' : 5, 'docstring' : 2, 'empty' : 1 }),
-                     'data/test2.py' : ('data', 'Python', { 'comment': 1, 'code': 3, 'total': 5, 'docstring': 1, 'empty': 1}) }
+        expected = { 'comment' : 3, 
+                     'code' : 5,
+                     'total' : 10,
+                     'docstring' : 3,
+                     'empty' : 2 }
           
-        self.assert_(loc('data') == expected)
+        self.assert_(loc(['data']).counts_by_type('Python') == expected)
 
 def suite():
     return unittest.TestLoader().loadTestsFromTestCase(Tests)

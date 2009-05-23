@@ -16,19 +16,33 @@ from cStringIO import StringIO
 from optparse import OptionParser
 import fnmatch, logging, os.path
 
+import pyloc.format
 from .logger import logger, handler
 from .util import loc
 
 def format_by_language(rslt):
-    categories = ['type'] + rslt.categories()
+    categories = rslt.categories()
     types = rslt.types()
 
-    print categories
-    print types
-
+    rows = [pyloc.format.SEPARATOR]
+    sum_row = {}
     for filetype in types:
-        print filetype, rslt.counts_by_type(filetype)
-        
+        fields = rslt.counts_by_type(filetype)
+        fields['type'] = filetype
+        rows.append(fields)
+        for cat,count in fields.items():
+            try:
+                sum_row[cat] += count
+            except KeyError:
+                sum_row[cat] = count
+
+    sum_row['type'] = 'SUM'
+    rows.append(pyloc.format.SEPARATOR)
+    rows.append(sum_row)
+
+    categories = ['type'] + categories
+
+    pyloc.format.print_table(categories, rows)
 
 def format_by_language_(values):
     '''print out results on a per-language basis
