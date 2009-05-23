@@ -1,4 +1,4 @@
-def by_language(rslt, cat):
+def by_language(rslt, cat, cat_title):
     types = rslt.types()
     counts = []
     for t in types:
@@ -9,4 +9,4 @@ def by_language(rslt, cat):
 
     counts = ','.join([str(c) for c in counts])
     types = '|'.join(types)
-    print 'http://chart.apis.google.com/chart?chs=250x100&chd=t:%s&cht=p3&chl=%s&chtt=%s by Language' % (counts,types,cat)
+    print 'http://chart.apis.google.com/chart?chs=250x100&chd=t:%s&cht=p3&chl=%s&chtt=%s by Language' % (counts,types,cat_title)
