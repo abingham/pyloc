@@ -34,3 +34,27 @@ def print_table(fields, rows):
         io.write('\n')
 
     print io.getvalue()
+
+def by_language(rslt):
+    categories = rslt.categories()
+    types = rslt.types()
+
+    rows = [SEPARATOR]
+    sum_row = {}
+    for filetype in types:
+        fields = rslt.counts_by_type(filetype)
+        fields['type'] = filetype
+        rows.append(fields)
+        for cat,count in fields.items():
+            try:
+                sum_row[cat] += count
+            except KeyError:
+                sum_row[cat] = count
+
+    sum_row['type'] = 'SUM'
+    rows.append(SEPARATOR)
+    rows.append(sum_row)
+
+    categories = ['type'] + categories
+
+    print_table(categories, rows)
