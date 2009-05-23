@@ -3,6 +3,7 @@ import os, os.path
 
 import pyloc
 
+from .db import Results
 from .logger import logger,handler
 
 def walk(root='.', recurse=True):
@@ -24,24 +25,29 @@ def walk(root='.', recurse=True):
             if not recurse:
                 break
 
-def loc(root='', recurse=True):
+def loc_(results, root='', recurse=True):
     '''count lines of code in a directory structure
 
     Sums all Python files in the specified folder.
     By default recurses through subfolders.
 
-    
-
     :param root: the root of the tree to search
     :param recurse: whether to recurse
     '''
-    rslt = {}
+
     for fspec in walk(root, recurse):
         for pattern, (type, func) in pyloc.lang_map.items():
             if fnmatch.fnmatch(fspec, pattern):
                 logger.info('%s TYPE=%s PATTERN=%s' % (fspec, type, pattern))
 
-                counts = func(open(fspec, 'r'))
-                rslt[fspec] = (root, type, counts)
+                results.add_result(fspec, root, type, 
+                                   func(open(fspec, 'r')))
                 break
+
+def loc(targets, root='', recurse=True):
+    rslt = Results()
+    
+    for tgt in targets:
+        loc_(rslt, tgt, recurse)
+
     return rslt

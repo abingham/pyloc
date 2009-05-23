@@ -19,7 +19,18 @@ import fnmatch, logging, os.path
 from .logger import logger, handler
 from .util import loc
 
-def format_by_language(values):
+def format_by_language(rslt):
+    categories = ['type'] + rslt.categories()
+    types = rslt.types()
+
+    print categories
+    print types
+
+    for filetype in types:
+        print filetype, rslt.counts_by_type(filetype)
+        
+
+def format_by_language_(values):
     '''print out results on a per-language basis
     
     :param values: { filename -> (root, filetype, { catg -> count } ) }
@@ -103,14 +114,9 @@ def main():
     if options.verbose:
         handler.setLevel(logging.DEBUG)
 
-    values = {}
-    for target in args:
-        if not os.path.exists(target):
-            logger.error('file or directory not found: %s' % target)
-        else:
-            values.update(loc(target))
+    rslt = loc(args)
 
-    format_by_language(values)
+    format_by_language(rslt)
 
 if __name__ == '__main__':
     main()
