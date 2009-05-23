@@ -71,16 +71,27 @@ class Results(object):
                         (None, catid, fileid, count))
 
     def categories(self):
+        '''get a list of all categories present in the results
+
+        Note that not all files will have all categories
+        '''
         cur = self.conn.cursor()
         cur.execute('SELECT category FROM categories')
         return [row[0] for row in cur]
 
     def types(self):
+        '''get a list of all file-types present in the results'''
+
         cur = self.conn.cursor()
         cur.execute('SELECT type FROM types')
         return [row[0] for row in cur]
 
     def counts_by_type(self, filetype):
+        '''get counts summed over a particular file type
+        
+        :param filetype: the filetype to get counts for
+        :return: a dictionary { category -> sum }
+        '''
         cur = self.conn.cursor()
         cur.execute('''SELECT categories.category, 
                               counts.count

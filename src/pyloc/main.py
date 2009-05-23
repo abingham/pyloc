@@ -29,6 +29,9 @@ def parse_args():
     parser.add_option('-f', '--format', dest='format',
                       help='format function for output',
                       default='pyloc.format.by_language')
+    parser.add_option('-a', '--args', dest='args',
+                      default='',
+                      help='arguments to pass to format function')
     return (parser.parse_args(),parser)
 
 def main():
@@ -42,7 +45,14 @@ def main():
 
     rslt = loc(args)
 
-    exec('%s(rslt)' % options.format)
+    format_module = '.'.join(options.format.split('.')[:-1])
+    format_command = '%s(rslt,%s)' % (options.format, options.args)
+
+    logger.info('format module: %s' % format_module)
+    logger.info('format function: %s' % format_command)
+
+    exec('import %s' % format_module)
+    exec(format_command)
 
 if __name__ == '__main__':
     main()

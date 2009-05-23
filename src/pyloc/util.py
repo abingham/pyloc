@@ -40,8 +40,12 @@ def loc_(results, root='', recurse=True):
             if fnmatch.fnmatch(fspec, pattern):
                 logger.info('%s TYPE=%s PATTERN=%s' % (fspec, type, pattern))
 
-                results.add_result(fspec, root, type, 
-                                   func(open(fspec, 'r')))
+                try:
+                    results.add_result(fspec, root, type, 
+                                       func(open(fspec, 'r')))
+                except IOError:
+                    pass
+
                 break
 
 def loc(targets, root='', recurse=True):
