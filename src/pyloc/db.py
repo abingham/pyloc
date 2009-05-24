@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS counts
 '''
 
 class Results(object):
-    def __init__(self):
-        self.conn = sqlite3.Connection(':memory:')
+    def __init__(self, name=':memory:'):
+        self.conn = sqlite3.Connection(name)
         cur = self.conn.cursor()
         cur.execute(types_table_sql)
         cur.execute(files_table_sql)
@@ -40,7 +40,9 @@ class Results(object):
         self.__types = {}
         self.__categories = {}
 
-    def close(self):
+    def close(self, commit=True):
+        if commit:
+            self.conn.commit()
         self.conn.close()
 
     def add_result(self, filename, root, type, counts):

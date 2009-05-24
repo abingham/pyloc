@@ -3,7 +3,6 @@ import os, os.path
 
 import pyloc
 
-from .db import Results
 from .logger import logger,handler
 
 def walk(root='.', recurse=True):
@@ -48,10 +47,8 @@ def loc_(results, root='', recurse=True):
 
                 break
 
-def loc(targets, root='', recurse=True):
-    rslt = Results()
-    
+def loc(targets, 
+        results,
+        recurse=True):
     for tgt in targets:
-        loc_(rslt, tgt, recurse)
-
-    return rslt
+        loc_(results, tgt, recurse)

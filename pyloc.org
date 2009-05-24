@@ -3,9 +3,11 @@
 PyLOC Orgfile
 
 All TODOs
-* TODO Clean up main()...it works but it could use some beautification
+* TODO Saving and loading an sqlite database
+* TODO option for listing built-in formatters
+* TODO better ordering of columns in default table
+* TODO bar chart of counts
 * TODO option to calculate relative percentages of counts
-* TODO option to count commentary lines but not blanks
 * TODO documentation
-** TODO expected output of an loc() function
+** TODO expected output of an loc() functiona mini sphinx manual would be good
 * TODO ability to show just top-level sums, intermediate directory sums, or individual file sums...granularity control

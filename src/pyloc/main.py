@@ -17,6 +17,7 @@ from optparse import OptionParser
 import fnmatch, logging, os.path
 
 import pyloc.format
+from .db import Results
 from .logger import logger, handler
 from .util import loc
 
@@ -32,6 +33,9 @@ def parse_args():
     parser.add_option('-a', '--args', dest='args',
                       default='',
                       help='arguments to pass to format function')
+    parser.add_option('-d', '--dbname', dest='dbname',
+                      default=None,
+                      help='load/save results from/to a database file')
     return (parser.parse_args(),parser)
 
 def main():
@@ -43,7 +47,13 @@ def main():
     if options.verbose:
         handler.setLevel(logging.DEBUG)
 
-    rslt = loc(args)
+    if options.dbname is None:
+        rslt = Results()
+    else:
+        logger.info('loading/saving results from %s' % options.dbname)
+        rslt = Results(options.dbname)
+
+    loc(args, rslt)
 
     format_module = '.'.join(options.format.split('.')[:-1])
     format_command = '%s(rslt,%s)' % (options.format, options.args)
@@ -53,6 +63,8 @@ def main():
 
     exec('import %s' % format_module)
     exec(format_command)
+
+    rslt.close()
 
 if __name__ == '__main__':
     main()
