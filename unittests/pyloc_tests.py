@@ -1,5 +1,6 @@
 import unittest
 
+from pyloc.db import Results
 from pyloc.util import loc
 
 class Tests(unittest.TestCase):
@@ -13,8 +14,13 @@ class Tests(unittest.TestCase):
         t1_expected = {'comment': 2, 'code': 2, 'total': 5, 'docstring': 2, 'empty': 1}
         t2_expected = {'comment': 1, 'code': 3, 'total': 5, 'docstring': 1, 'empty': 1}
         
-        self.assert_(loc(['data/test1.py']).counts_by_type('Python') == t1_expected)
-        self.assert_(loc(['data/test2.py']).counts_by_type('Python') == t2_expected)
+        r = Results()
+        loc(['data/test1.py'], r)
+        self.assert_(r.counts_by_type('Python') == t1_expected)
+
+        r = Results()
+        loc(['data/test2.py'], r)
+        self.assert_(r.counts_by_type('Python') == t2_expected)
 
     def test_python_dir(self):
         expected = { 'comment' : 3, 
@@ -22,8 +28,10 @@ class Tests(unittest.TestCase):
                      'total' : 10,
                      'docstring' : 3,
                      'empty' : 2 }
-          
-        self.assert_(loc(['data']).counts_by_type('Python') == expected)
+
+        r = Results()
+        loc(['data'], r)
+        self.assert_(r.counts_by_type('Python') == expected)
 
 def suite():
     return unittest.TestLoader().loadTestsFromTestCase(Tests)
