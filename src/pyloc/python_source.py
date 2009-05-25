@@ -80,7 +80,6 @@ class LOCLexer(object):
         self.comment_line = False
         self.code_line = False
 
-    space_re = re.compile(space)
     def t_error(self, t):
         # self.empty_line = False
         t.lexer.skip(1) 
