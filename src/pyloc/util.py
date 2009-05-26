@@ -24,6 +24,21 @@ def walk(root='.', recurse=True):
             if not recurse:
                 break
 
+def process_file(fspec, results, root):
+    for pattern, (type, func) in pyloc.lang_map.items():
+        if fnmatch.fnmatch(fspec, pattern):
+            logger.info('%s TYPE=%s PATTERN=%s' % (fspec, type, pattern))
+            
+            try:
+                results.add_result(fspec, root, type, 
+                                   func(open(fspec, 'r')))
+            except IOError:
+                logger.warning('IOError on %s' % fspec)
+                pass
+            
+            return True
+    return False
+
 def loc_(results, root='', recurse=True):
     '''count lines of code in a directory structure
 
@@ -35,17 +50,8 @@ def loc_(results, root='', recurse=True):
     '''
 
     for fspec in walk(root, recurse):
-        for pattern, (type, func) in pyloc.lang_map.items():
-            if fnmatch.fnmatch(fspec, pattern):
-                logger.info('%s TYPE=%s PATTERN=%s' % (fspec, type, pattern))
-
-                try:
-                    results.add_result(fspec, root, type, 
-                                       func(open(fspec, 'r')))
-                except IOError:
-                    pass
-
-                break
+        if not process_file(fspec, results, root):
+            logger.info('No matching pattern for %s. Lines not counted.' % fspec)
 
 def loc(targets, 
         results,
