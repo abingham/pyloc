@@ -5,6 +5,7 @@ from ply.lex import TOKEN
 class LOCLexer(object):
     tokens = ( 'BLOCK_COMMENT',
                'COMMENT',
+               'CODE',
                )
 
     space = r'[\t\ ]*'
