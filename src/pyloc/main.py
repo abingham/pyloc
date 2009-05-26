@@ -21,10 +21,15 @@ from .db import Results
 from .logger import logger, handler
 from .util import loc
 
+usage = '''%prog [options] [root1 root2 . . .]
 
+Built-in formatters:
+ pyloc.format.by_langauge
+ pyloc.pie_chart.by_language(category, title)
+'''
 
 def parse_args():
-    parser = OptionParser(usage='%prog [options] [root1 root2 . . .]')
+    parser = OptionParser(usage=usage)
     parser.add_option('-v', '--verbose', action='store_true',
                       dest='verbose', help='increase logging output')
     parser.add_option('-f', '--format', dest='format',

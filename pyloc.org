@@ -3,8 +3,6 @@
 PyLOC Orgfile
 
 All TODOs
-* TODO Saving and loading an sqlite database
-* TODO option for listing built-in formatters
 * TODO better ordering of columns in default table
 * TODO bar chart of counts
 * TODO option to calculate relative percentages of counts
