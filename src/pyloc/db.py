@@ -29,7 +29,15 @@ CREATE TABLE IF NOT EXISTS counts
 '''
 
 class Results(object):
+    '''Holds the accumulated results of scanning source files
+    '''
+
     def __init__(self, name=':memory:'):
+        '''construct a new Results object
+        
+        :param name: The filename for the sqlite database. By default,
+                     this will construct a memory db
+        '''
         self.conn = sqlite3.Connection(name)
         cur = self.conn.cursor()
         cur.execute(types_table_sql)
@@ -41,6 +49,11 @@ class Results(object):
         self.__categories = {}
 
     def close(self, commit=True):
+        '''close the results object and associated database
+        
+        :param commit: indicates if the changes should be committed to
+                       the database
+        '''
         if commit:
             self.conn.commit()
         self.conn.close()
