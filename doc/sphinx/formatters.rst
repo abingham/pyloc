@@ -1,3 +1,5 @@
+.. _format-function-document:
+
 Format Functions
 ================
 
