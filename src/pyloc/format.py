@@ -33,7 +33,7 @@ def print_table(fields, rows):
             
         io.write('\n')
 
-    print io.getvalue()
+    return io.getvalue()
 
 def by_language(rslt):
     categories = rslt.categories()
@@ -57,4 +57,4 @@ def by_language(rslt):
 
     categories = ['type'] + categories
 
-    print_table(categories, rows)
+    return print_table(categories, rows)
