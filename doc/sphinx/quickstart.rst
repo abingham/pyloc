@@ -36,7 +36,8 @@ database to a file with the ``-d`` or ``--dbname`` argument::
 
 In this case, pyloc would store the raw LOC data in a database named
 test.db (see :ref:`db-format-document` for a description of the
-database.)
+database), and you would be free to work with that data any way you
+saw fit.
 
 .. topic:: A Note of Caution
 
