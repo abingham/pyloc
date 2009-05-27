@@ -10,11 +10,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   quickstart
-   installation
-   formatters
-   db_format
-   parsers
+   Quick Start <quickstart>
+   Installation <installation>
+   Format Functions <formatters>
+   Results Database <db_format>
+   Parsers <parsers>
+   API <api>
 
 Indices and tables
 ==================
