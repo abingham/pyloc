@@ -128,6 +128,27 @@ class Results(object):
                 rslt[cat] = count
         return rslt
         
+    def counts_by_category(self, category):
+        cur = self.conn.cursor()
+        cur.execute('''SELECT types.type,
+                              counts.count
+                       FROM counts,
+                            types,
+                            files,
+                            categories
+                       WHERE categories.category = ?
+                             AND counts.cat_id = categories.id
+                             AND files.id = counts.file_id
+                             AND types.id = files.type_id''',
+                    (category,))
+        counts = [(row[0],row[1]) for row in cur]
+        rslt = {}
+        for type,count in counts:
+            try:
+                rslt[type] += count
+            except KeyError:
+                rslt[type] = count
+        return rslt
 
     def sum_categories(self, filetype):
         pass
